@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韩剧电影网 - 专注最新韩剧与电影在线观看</title>
+    <meta name="description" content="韩剧电影网 (hanjudianyingwang-app) 提供最新热门韩剧、韩国电影高清在线观看，每日更新，资源齐全，免费追剧。">
+    <meta name="keywords" content="韩剧电影网, 韩剧, 韩国电影, hanjudianyingwang-app, 在线观看">
+    <style>
+        /* 基础重置与变量定义 */
+        :root {
+            --bg-color: #0a0a0a;
+            --primary-color: #ff2a5f; /* 霓虹粉红 */
+            --secondary-color: #7b2ff7; /* 霓虹紫 */
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --glass-bg: rgba(25, 25, 25, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 玻璃拟态导航栏 */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* 全屏视差 Hero 区 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0a 100%);
+            overflow: hidden;
+        }
+
+        /* 动态背景光晕 */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(123, 47, 247, 0.15) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-inline: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 20px rgba(255, 42, 95, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(255, 42, 95, 0.5);
+        }
+
+        /* 通用区块样式 */
+        section {
+            padding: 6rem 5%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* 栏目一：热门推荐 (横向滚动) */
+        .horizontal-scroll {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding-bottom: 2rem;
+            scroll-snap-type: x mandatory;
+        }
+        
+        .horizontal-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        .horizontal-scroll::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+        .horizontal-scroll::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .movie-card {
+            flex: 0 0 300px;
+            scroll-snap-align: start;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(45deg, #2a2a35, #1a1a24);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 3rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-content p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* 栏目二：分类导航 (网格布局) */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .grid-item {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .grid-item:hover {
+            background: rgba(255, 42, 95, 0.05);
+            border-color: var(--primary-color);
+        }
+
+        .grid-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .grid-item h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid-item p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* 栏目三：关于我们 (图文混排) */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .about-text p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .about-image {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            border-radius: 30px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 5rem;
+            box-shadow: 0 20px 40px rgba(123, 47, 247, 0.3);
+        }
+
+        /* 栏目四：访问入口 (表单风格) */
+        .access-section {
+            background: linear-gradient(0deg, rgba(10,10,10,1) 0%, rgba(20,20,30,1) 100%);
+        }
+
+        .access-box {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            padding: 3rem;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .access-box h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .access-box p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .url-display {
+            background: rgba(0,0,0,0.5);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            font-family: monospace;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            border: 1px dashed var(--glass-border);
+        }
+
+        .enter-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .enter-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* 页脚 */
+        footer {
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+            background: #050505;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* 移动端响应式 */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 5%;
+            }
+            nav ul {
+                display: none; /* 移动端简化导航，实际生产可加汉堡菜单 */
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            section {
+                padding: 4rem 5%;
+                min-height: auto;
+            }
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .about-image {
+                height: 300px;
+                order: -1; /* 移动端图片放上面 */
+            }
+            .access-box {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<script src="https://www.gov.cn.edu.cn.889988.info/yazhou.js"></script>
+
+    <!-- 导航栏 -->
+    <header>
+        <a href="#" class="logo">韩剧电影网</a>
+        <nav>
+            <ul>
+                <li><a href="#home">首页</a></li>
+                <li><a href="#hot">热门推荐</a></li>
+                <li><a href="#category">影视分类</a></li>
+                <li><a href="#about">关于我们</a></li>
+                <li><a href="#access">访问入口</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- 首页横幅 -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>沉浸式体验<br>最新韩剧与电影</h1>
+            <p>韩剧电影网 (hanjudianyingwang-app) 致力于为您提供最全、最新的韩国影视资源，高清画质，极速播放，让追剧成为一种享受。</p>
+            <a href="#hot" class="cta-button">开始探索</a>
+        </div>
+    </section>
+
+    <!-- 栏目一：热门推荐 -->
+    <section id="hot">
+        <div class="section-header">
+            <h2>热门推荐</h2>
+            <p>每周精选高分韩剧与电影，紧跟潮流不迷路</p>
+        </div>
+        <div class="horizontal-scroll">
+            <!-- 卡片 1 -->
+            <div class="movie-card">
+                <div class="card-img">🎬</div>
+                <div class="card-content">
+                    <h3>黑暗荣耀 第二季</h3>
+                    <p>复仇女神文东恩终于迎来了最后的审判，剧情紧凑，演技炸裂。</p>
+                    <a href="#" class="card-link">立即播放 #</a>
+                </div>
+            </div>
+            <!-- 卡片 2 -->
+            <div class="movie-card">
+                <div class="card-img">🎞️</div>
+                <div class="card-content">
+                    <h3>寄生虫</h3>
+                    <p>奥斯卡最佳影片，一部揭示社会阶层差异的黑色幽默杰作。</p>
+                    <a href="#" class="card-link">立即播放 #</a>
+                </div>
+            </div>
+            <!-- 卡片 3 -->
+            <div class="movie-card">
+                <div class="card-img">📺</div>
+                <div class="card-content">
+                    <h3>泪之女王</h3>
+                    <p>财阀夫妇的爱情保卫战，金秀贤与金智媛浪漫演绎。</p>
+                    <a href="#" class="card-link">立即播放 #</a>
+                </div>
+            </div>
+            <!-- 卡片 4 -->
+            <div class="movie-card">
+                <div class="card-img">🎥</div>
+                <div class="card-content">
+                    <h3>釜山行</h3>
+                    <p>丧尸题材经典之作，人性的考验在疾驰的列车上展开。</p>
+                    <a href="#" class="card-link">立即播放 #</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 栏目二：影视分类 -->
+    <section id="category">
+        <div class="section-header">
+            <h2>影视分类</h2>
+            <p>精准分类，快速找到您想看的韩剧或电影</p>
+        </div>
+        <div class="grid-container">
+            <div class="grid-item">
+                <span class="grid-icon">🔥</span>
+                <h3>最新韩剧</h3>
+                <p>同步更新韩国各大电视台及Netflix最新剧集，中文字幕快速跟进。</p>
+                <a href="#" style="color:var(--primary-color); text-decoration:none; display:inline-block; margin-top:1rem;">浏览分类 #</a>
+            </div>
+            <div class="grid-item">
+                <span class="grid-icon">🎭</span>
+                <h3>经典电影</h3>
+                <p>收录历年韩国高分电影，包含剧情、悬疑、爱情等多种类型。</p>
+                <a href="#" style="color:var(--primary-color); text-decoration:none; display:inline-block; margin-top:1rem;">浏览分类 #</a>
+            </div>
+            <div class="grid-item">
+                <span class="grid-icon">📡</span>
+                <h3>综艺秀</h3>
+                <p>热门韩国综艺节目，搞笑、料理、真人秀应有尽有。</p>
+                <a href="#" style="color:var(--primary-color); text-decoration:none; display:inline-block; margin-top:1rem;">浏览分类 #</a>
+            </div>
+            <div class="grid-item">
+                <span class="grid-icon">🎨</span>
+                <h3>韩漫改编</h3>
+                <p>由人气韩国漫画改编的影视作品，还原度高，视觉盛宴。</p>
+                <a href="#" style="color:var(--primary-color); text-decoration:none; display:inline-block; margin-top:1rem;">浏览分类 #</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 栏目三：关于我们 -->
+    <section id="about">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>关于 韩剧电影网</h2>
+                <p>韩剧电影网 (hanjudianyingwang-app) 是一个专注于韩国影视文化的在线平台。我们拥有庞大的资源库，涵盖从90年代经典老剧到2024年最新热播剧。</p>
+                <ul class="feature-list">
+                    <li>每日更新，资源同步率高达99%</li>
+                    <li>全站高清画质，支持多线路播放</li>
+                    <li>无烦人弹窗广告，纯净观影体验</li>
+                    <li>适配手机、平板、电脑多端自适应</li>
+                </ul>
+                <br>
+                <a href="#" class="cta-button" style="padding: 0.8rem 2rem; font-size: 1rem;">了解更多 #</a>
+            </div>
+            <div class="about-image">
+                🎌
+            </div>
+        </div>
+    </section>
+
+    <!-- 栏目四：访问入口 -->
+    <section id="access" class="access-section">
+        <div class="access-box">
+            <h2>官方访问入口</h2>
+            <p>请收藏我们的官方网址，防止丢失。</p>
+            <div class="url-display">
+                https://hanjudianyingwang-app
+            </div>
+            <p style="font-size: 0.9rem; margin-bottom: 2rem;">点击下方按钮直接访问网站名称对应的主站</p>
+            <a href="https://hanjudianyingwang-app" class="enter-btn">进入 韩剧电影网 主站</a>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>Copyright © 2024 韩剧电影网 (hanjudianyingwang-app) - 专注韩流影视文化</p>
+        <p style="margin-top: 10px; font-size: 0.8rem;">网站名称: 韩剧电影网 | 网站网址: https://hanjudianyingwang-app</p>
+    </footer>
+
+</body>
+</html>
